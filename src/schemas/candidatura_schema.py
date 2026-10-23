@@ -1,9 +1,7 @@
-from typing import TYPE_CHECKING
 from pydantic import BaseModel, ConfigDict
 
-if TYPE_CHECKING:
-    from schemas.candidato_schema import CandidatoResponse
-    from schemas.urna_schema import UrnaResponse
+from schemas.candidato_schema import CandidatoResponse
+from schemas.urna_schema import UrnaResponse
 
 class CandidaturaCreate(BaseModel):
     urna_id: int

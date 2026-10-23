@@ -36,6 +36,6 @@ class UrnaResponse(UrnaBaseModel):
 
     id: int
 
-class UrnaComDetalhe(CandidaturaComCandidato):
+class UrnaComDetalhe(UrnaResponse):
     model_config = ConfigDict(from_attributes=True)
-    candidatos: list["CandidaturaComCandidato"]
+    candidaturas: list["CandidaturaComCandidato"]

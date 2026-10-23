@@ -34,5 +34,5 @@ class CandidatoResponse(CandidatoBaseModel):
 
     id: int
 
-class CandidatoDetalhe(CandidaturaComUrna):
-    urnas: list["CandidaturaComUrna"]
+class CandidatoDetalhe(CandidatoResponse):
+    candidaturas: list["CandidaturaComUrna"]
