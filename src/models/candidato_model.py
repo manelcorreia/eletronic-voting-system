@@ -1,9 +1,18 @@
-from dataclasses import dataclass
+from typing import TYPE_CHECKING
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import String
+from models.base import Base
 
-@dataclass
-class Candidato:
-    nome: str
-    votos: int = 0
+if TYPE_CHECKING:
+    from models.candidatura_model import Candidatura
 
-    def __repr__(self):
-        return f"Candidato({self.nome}, {self.votos})"
+class Candidato(Base):
+    __tablename__ = 'candidatos'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    nome: Mapped[str] = mapped_column(String(120))
+
+    candidaturas: Mapped[list["Candidatura"]] = relationship(back_populates="candidato", cascade="all, delete-orphan", lazy="selectin")
+
+    @property
+    def total_votos(self) -> int:
+        return sum(c.votos for c in self.candidaturas)
