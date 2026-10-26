@@ -11,8 +11,8 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.pool import StaticPool
 from sqlalchemy.orm import sessionmaker
 
-from modelos import Base                          # MUDAR: módulo onde está a tua Base
-from escola_repositorio import EscolaRepositorio  # MUDAR: o teu repositório
+from models.base import Base
+  # MUDAR: o teu repositório
 
 
 @pytest.fixture

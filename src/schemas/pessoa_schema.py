@@ -32,10 +32,10 @@ class PessoaCreate(PessoaBaseModel):
         if len(valor) < 8:
             raise ValueError("Password tem de ter pelo menos 8 dígitos")
 
-        if not any(l.isdigit for l in valor):
+        if not any(l.isdigit() for l in valor):
             raise ValueError("Password tem de ter pelo menos 1 número")
 
-        if not any(l.isupper for l in valor):
+        if not any(l.isupper() for l in valor):
             raise ValueError("Password tem de ter pelo menos 1 letra maiúscula")
 
         if not any(l in string.punctuation for l in valor):
