@@ -3,11 +3,16 @@ from types import SimpleNamespace
 import pytest
 from pydantic import ValidationError
 
+from schemas import UrnaResponse, UrnaComDetalhe
 from schemas.candidato_schema import CandidatoCreate, CandidatoUpdate, CandidatoResponse, CandidatoDetalhe
+from schemas.candidatura_schema import CandidaturaCreate, CandidaturaResponse
 from schemas.pessoa_schema import PessoaCreate, PessoaUpdate, PessoaResponse
+from schemas.urna_schema import UrnaCreate, UrnaUpdate
 
 VALIDO_PESSOA = dict(nome="test", cc="12345678", urna_id=1, password="Abcvdfjfa1#")
 VALIDO_CANDIDATO = dict(nome="test")
+VALIDO_URNA = dict(localidade="test")
+VALIDO_CANDIDATURA = dict(urna_id=1,candidato_id=1)
 
 def test_create_pessoa_valido():
     pessoa = PessoaCreate(**VALIDO_PESSOA)
@@ -134,3 +139,99 @@ def test_candidato_com_detalhe():
 
     assert schema is not None
     assert len(schema.candidaturas) == 2
+
+def test_create_urna_valida():
+    urna = UrnaCreate(**VALIDO_URNA)
+
+    assert urna is not None
+    assert urna.localidade == "test"
+    assert urna.fechada is False
+
+@pytest.mark.parametrize("campo, valor", [
+    ("localidade", "te"),
+    ("localidade", "test3"),
+])
+def test_create_urna_invalido(campo, valor):
+    with pytest.raises(ValidationError):
+        UrnaCreate(**{**VALIDO_URNA, campo: valor})
+
+def test_update_urna_completa():
+    urna = UrnaUpdate(localidade="test", fechada=True)
+
+    assert urna is not None
+    assert urna.localidade == "test"
+    assert urna.fechada is True
+
+def test_update_urna_incompleta():
+    urna = UrnaUpdate(fechada=True)
+
+    assert urna is not None
+    assert urna.localidade is None
+    assert urna.fechada is True
+
+@pytest.mark.parametrize("campo, valor", [
+    ("localidade", "te"),
+    ("localidade", "test3"),
+])
+def test_update_urna_invalida(campo, valor):
+    with pytest.raises(ValidationError):
+        UrnaUpdate(**{**VALIDO_URNA, campo: valor})
+
+def test_update_urna_exclude_unset():
+    dados = {"fechada":True}
+
+    update = UrnaUpdate(**dados)
+
+    assert update is not None
+    assert update.fechada is True
+    assert update.localidade is None
+
+    exclude = update.model_dump(exclude_unset=True)
+
+    assert exclude is not None
+    assert exclude == {"fechada":True}
+
+def test_update_urna_vazio():
+    update = UrnaUpdate()
+
+    assert update is not None
+    assert update.localidade is None
+    assert update.fechada is None
+
+def test_response_urna_a_partir_de_objeto():
+    obj = SimpleNamespace(id=1, localidade="test")
+
+    urna = UrnaResponse.model_validate(obj)
+
+    assert urna is not None
+    assert urna.localidade == "test"
+    assert urna.fechada is False
+    assert urna.id == obj.id
+
+def test_urna_com_detalhe():
+    obj = SimpleNamespace(id=1, localidade="test", candidaturas=[
+        SimpleNamespace(urna_id=1, candidato_id=1,votos=1,candidato=SimpleNamespace(id=1,nome="test")),
+        SimpleNamespace(urna_id=1, candidato_id=2,votos=1,candidato=SimpleNamespace(id=2,nome="test")),
+    ])
+
+    com_detalhe = UrnaComDetalhe.model_validate(obj)
+
+    assert com_detalhe is not None
+    assert len(com_detalhe.candidaturas) == 2
+
+def test_create_candidatura_valida():
+    candidatura = CandidaturaCreate(**VALIDO_CANDIDATURA)
+
+    assert candidatura is not None
+    assert candidatura.urna_id == 1
+    assert candidatura.candidato_id == 1
+
+def test_response_candidatura_a_partir_de_objeto():
+    obj = SimpleNamespace(urna_id=1, candidato_id=1, votos=1)
+
+    candidatura = CandidaturaResponse.model_validate(obj)
+
+    assert candidatura is not None
+    assert candidatura.urna_id == obj.urna_id
+    assert candidatura.votos == 1
+    assert candidatura.candidato_id == obj.candidato_id
