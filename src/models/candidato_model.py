@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 class Candidato(Base):
     __tablename__ = 'candidatos'
     id: Mapped[int] = mapped_column(primary_key=True)
-    nome: Mapped[str] = mapped_column(String(120))
+    nome: Mapped[str] = mapped_column(String(120),unique=True)
 
     candidaturas: Mapped[list["Candidatura"]] = relationship(back_populates="candidato", cascade="all, delete-orphan", lazy="selectin")
 
