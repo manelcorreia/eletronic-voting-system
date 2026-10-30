@@ -23,7 +23,7 @@ class UrnaRepository:
         comando = select(Urna).where(Urna.localidade == localidade)
         return self.session.scalars(comando).one_or_none()
 
-    def fechar_urna(self, urna_id):
+    def fechar_urna(self, urna_id: int):
         urna = self.obter_urna_por_id(urna_id)
 
         if urna is None:
