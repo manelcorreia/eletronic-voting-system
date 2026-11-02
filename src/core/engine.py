@@ -5,7 +5,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # carregar as variáveis do ficheiro .env para a memória do sistema
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 load_dotenv(BASE_DIR / '.env')
 DATABASE_URL = os.getenv("DATABASE_URL")
 
