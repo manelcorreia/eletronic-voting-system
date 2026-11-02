@@ -18,3 +18,12 @@ class PessoaService:
         except Exception:
             self.session.rollback()
             raise
+
+    def iniciar_sessao(self, cc: str, password: str) -> PessoaResponse | None:
+        try:
+            pessoa = self.repository.obter_por_cc(cc)
+            if pessoa.password == password:
+                schema = PessoaResponse.model_validate(pessoa)
+                return schema
+        except Exception:
+            raise
