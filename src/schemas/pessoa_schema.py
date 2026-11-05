@@ -1,5 +1,6 @@
 import string
 
+from typing import Literal
 from pydantic import BaseModel, field_validator, Field, model_validator, ConfigDict
 
 
@@ -25,6 +26,7 @@ class PessoaBaseModel(BaseModel):
 
 class PessoaCreate(PessoaBaseModel):
     password: str = Field(min_length=8)
+    cargo: Literal["responsavel"] | None = None
 
     @field_validator('password')
     @classmethod
@@ -48,6 +50,7 @@ class PessoaUpdate(PessoaBaseModel):
     cc: str | None = Field(default=None, min_length=8)
     urna_id: int | None = None
     votou: bool | None = None
+    cargo: Literal["responsavel"] | None = None
     password: str | None = Field(default=None, min_length=8)
 
     @field_validator('nome')
@@ -93,3 +96,4 @@ class PessoaResponse(PessoaBaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    cargo: Literal["responsavel"] | None = None

@@ -14,6 +14,7 @@ class Pessoa(Base):
     password: Mapped[str] = mapped_column(String(120))
     urna_id: Mapped[int] = mapped_column(ForeignKey("urnas.id", ondelete="CASCADE"))
     votou: Mapped[bool] = mapped_column(default=False)
+    cargo: Mapped[str | None] = mapped_column(String(20), nullable=True)
 
     urna: Mapped["Urna"] = relationship(back_populates="pessoas")
 
