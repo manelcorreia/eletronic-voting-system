@@ -10,7 +10,7 @@ class PessoaService:
 
     def criar_pessoa(self, pessoa: PessoaCreate) -> PessoaResponse:
         try:
-            pessoa = self.repository.adicionar_pessoa(pessoa)
+            pessoa = self.repository.registar_pessoa(pessoa)
             self.session.commit()
             self.session.refresh(pessoa)
             schema = PessoaResponse.model_validate(pessoa)
@@ -21,9 +21,8 @@ class PessoaService:
 
     def iniciar_sessao(self, cc: str, password: str) -> PessoaResponse | None:
         try:
-            pessoa = self.repository.obter_por_cc(cc)
-            if pessoa.password == password:
-                schema = PessoaResponse.model_validate(pessoa)
-                return schema
+            pessoa = self.repository.iniciar_sessao(cc, password)
+            if pessoa is not None:
+                return PessoaResponse.model_validate(pessoa)
         except Exception:
             raise

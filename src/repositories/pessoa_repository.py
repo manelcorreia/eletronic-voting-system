@@ -9,7 +9,7 @@ class PessoaRepository:
     def __init__(self, session: Session):
         self.session = session
 
-    def adicionar_pessoa(self, pessoa: PessoaCreate) -> Pessoa:
+    def registar_pessoa(self, pessoa: PessoaCreate) -> Pessoa:
         if self.obter_por_cc(pessoa.cc) is not None:
             raise ValueError("Pessoa já está registada")
         model = Pessoa(**pessoa.model_dump())
@@ -19,3 +19,8 @@ class PessoaRepository:
     def obter_por_cc(self, cc: str) -> Pessoa | None:
         comando = select(Pessoa).where(Pessoa.cc == cc)
         return self.session.scalars(comando).one_or_none()
+
+    def iniciar_sessao(self, cc: str, password: str) -> Pessoa | None:
+        comando = select(Pessoa).where(Pessoa.cc == cc, Pessoa.password == password)
+        return self.session.scalars(comando).one_or_none()
+
