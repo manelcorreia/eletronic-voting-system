@@ -1,11 +1,11 @@
 from typing import TYPE_CHECKING
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from models.base import Base
+from src.models.base import Base
 
 if TYPE_CHECKING:
-    from models.pessoa_model import Pessoa
-    from models.candidatura_model import Candidatura
+    from src.models.pessoa_model import Pessoa
+    from src.models.candidatura_model import Candidatura
 
 class Urna(Base):
     __tablename__ = 'urnas'

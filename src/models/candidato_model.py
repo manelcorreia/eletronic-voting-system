@@ -1,10 +1,10 @@
 from typing import TYPE_CHECKING
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String
-from models.base import Base
+from src.models.base import Base
 
 if TYPE_CHECKING:
-    from models.candidatura_model import Candidatura
+    from src.models.candidatura_model import Candidatura
 
 class Candidato(Base):
     __tablename__ = 'candidatos'
