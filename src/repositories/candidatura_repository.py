@@ -38,3 +38,14 @@ class CandidaturaRepository:
 
         candidatura.votos += 1
         pessoa.votou = True
+
+    def obter_candidaturas(self) -> list[Candidatura]:
+        comando = select(Candidatura)
+        return list(self.session.scalars(comando).all())
+
+    def contar_votos_na_urna(self, urna_id: int) -> int:
+        total = 0
+        for candidatura in self.obter_candidaturas():
+            if candidatura.urna_id == urna_id:
+                total += candidatura.votos
+        return total
