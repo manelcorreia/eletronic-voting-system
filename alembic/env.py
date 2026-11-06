@@ -10,6 +10,10 @@ from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 from src.models.base import Base
+from src.models.pessoa_model import Pessoa
+from src.models.candidatura_model import Candidatura
+from src.models.urna_model import Urna
+from src.models.candidato_model import Candidato
 
 # Carrega as variáveis do ficheiro .env localizado na raiz
 caminho_env = os.path.join(dirname(dirname(abspath(__file__))), ".env")
