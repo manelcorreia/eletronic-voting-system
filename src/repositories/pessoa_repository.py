@@ -24,3 +24,7 @@ class PessoaRepository:
         comando = select(Pessoa).where(Pessoa.cc == cc, Pessoa.password == password)
         return self.session.scalars(comando).one_or_none()
 
+    def ver_se_votou(self, pessoa: Pessoa) -> bool:
+        if pessoa.votou:
+            return True
+        return False
