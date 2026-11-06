@@ -1,5 +1,6 @@
 from repositories.candidatura_repository import CandidaturaRepository
 from schemas.candidatura_schema import CandidaturaCreate, CandidaturaResponse
+from schemas.pessoa_schema import PessoaResponse
 
 
 class CandidaturaService:
@@ -18,9 +19,13 @@ class CandidaturaService:
             self.session.rollback()
             raise
 
-    def adicionar_voto_a_candidatura(self, pessoa_cc: str, candidato_id: int):
+    def votar(self, pessoa: PessoaResponse, candidato_id: int):
         try:
-            self.repository.voto(pessoa_cc, candidato_id)
+            self.repository.voto(pessoa.cc, candidato_id)
+            self.session.commit()
         except Exception:
             self.session.rollback()
             raise
+
+    def ver_votos_totais_urna(self, urna_id: int) -> int:
+        return self.repository.contar_votos_na_urna(urna_id)
