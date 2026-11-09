@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from starlette.status import HTTP_201_CREATED, HTTP_200_OK
+from starlette.status import HTTP_201_CREATED, HTTP_200_OK, HTTP_204_NO_CONTENT
 
 from api.dependencies import UrnaServiceDep
 from schemas import UrnaResponse
@@ -36,10 +36,10 @@ def ver_numero_nao_votantes(urna_id: int, service: UrnaServiceDep) -> int:
 def ver_numero_votantes(urna_id: int, service: UrnaServiceDep) -> int:
     return service.ver_quantos_votaram(urna_id)
 
-@router.patch("/updates/{urna_id}", response_model=UrnaResponse, status_code=HTTP_200_OK)
+@router.patch("/updates/urna/{urna_id}", response_model=UrnaResponse, status_code=HTTP_200_OK)
 def editar_urna(pessoa: PessoaResponse, update: UrnaUpdate, urna_id: int, service: UrnaServiceDep) -> UrnaResponse:
     return service.editar_urna(pessoa, update, urna_id)
 
-@router.delete("/apagar/{urna_id}", status_code=HTTP_200_OK)
+@router.delete("/apagar/urna", status_code=HTTP_204_NO_CONTENT)
 def apagar_urna(pessoa: PessoaResponse, urna_id: int, service: UrnaServiceDep):
     return service.apagar_urna(pessoa, urna_id)
