@@ -21,6 +21,9 @@ class CandidaturaRepository:
         comando = select(Candidatura).where(Candidatura.urna_id == urna_id, Candidatura.candidato_id == candidato_id)
         return self.session.scalars(comando).one_or_none()
 
+    def obter_candidatura_por_id(self, candidatura_id: int) -> Candidatura | None:
+        return self.session.get(Candidatura, candidatura_id)
+
     def voto(self, pessoa_cc: str, candidato_id: int):
         pessoa = PessoaRepository(self.session).obter_por_cc(pessoa_cc)
         if not pessoa:
@@ -49,3 +52,10 @@ class CandidaturaRepository:
             if candidatura.urna_id == urna_id:
                 total += candidatura.votos
         return total
+
+    def apagar_candidatura(self, candidatura_id: int):
+        candidatura = self.obter_candidatura_por_id(candidatura_id)
+        if not candidatura:
+            raise ValueError("Não existe candidatura com esse id")
+
+        self.session.delete(candidatura)
