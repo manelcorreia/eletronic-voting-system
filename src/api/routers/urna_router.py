@@ -4,7 +4,7 @@ from starlette.status import HTTP_201_CREATED, HTTP_200_OK
 from api.dependencies import UrnaServiceDep
 from schemas import UrnaResponse
 from schemas.pessoa_schema import PessoaResponse
-from schemas.urna_schema import UrnaCreate
+from schemas.urna_schema import UrnaCreate, UrnaUpdate
 
 router = APIRouter(prefix="/urnas", tags=["urnas"])
 
@@ -35,3 +35,11 @@ def ver_numero_nao_votantes(urna_id: int, service: UrnaServiceDep) -> int:
 @router.get("/votantes/{urna_id}", response_model=int, status_code=HTTP_200_OK)
 def ver_numero_votantes(urna_id: int, service: UrnaServiceDep) -> int:
     return service.ver_quantos_votaram(urna_id)
+
+@router.patch("/updates/{urna_id}", status_code=HTTP_200_OK)
+def editar_urna(pessoa: PessoaResponse, update: UrnaUpdate, urna_id: int, service: UrnaServiceDep):
+    return service.editar_urna(pessoa, update, urna_id)
+
+@router.delete("/apagar/{urna_id}", status_code=HTTP_200_OK)
+def apagar_urna(pessoa: PessoaResponse, urna_id: int, service: UrnaServiceDep):
+    return service.apagar_urna(pessoa, urna_id)

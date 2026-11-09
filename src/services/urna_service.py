@@ -6,7 +6,7 @@ from repositories.pessoa_repository import PessoaRepository
 from repositories.urna_repository import UrnaRepository
 from schemas.candidatura_schema import CandidaturaCreate
 from schemas.pessoa_schema import PessoaResponse
-from schemas.urna_schema import UrnaCreate, UrnaResponse
+from schemas.urna_schema import UrnaCreate, UrnaResponse, UrnaUpdate
 from services.permissoes import exigir_cargo_responsavel, exigir_cargo_admin
 
 
@@ -19,7 +19,7 @@ class UrnaService:
         self.pessoas_repository = pessoas_repository
 
     def criar_urna(self, pessoa: PessoaResponse, urna: UrnaCreate) -> UrnaResponse:
-        exigir_cargo_responsavel(pessoa)
+        exigir_cargo_admin(pessoa)
         try:
             model = self.repository.adicionar_urna(urna)
             self.session.flush()
@@ -38,7 +38,7 @@ class UrnaService:
             raise
 
     def fechar_urna(self, pessoa: PessoaResponse, urna_id: int):
-        exigir_cargo_admin(pessoa)
+        exigir_cargo_responsavel(pessoa)
 
         urna = self.repository.obter_urna_por_id(urna_id)
         if urna is None:
@@ -98,3 +98,22 @@ class UrnaService:
                 total += 1
 
         return total
+
+    def editar_urna(self, pessoa: PessoaResponse, update: UrnaUpdate, urna_id: int):
+        exigir_cargo_admin(pessoa)
+        try:
+            self.repository.update_urna(update, urna_id)
+            self.session.commit()
+            self.session.refresh(update)
+        except Exception:
+            self.session.rollback()
+            raise
+
+    def apagar_urna(self, pessoa: PessoaResponse, urna_id: int):
+        exigir_cargo_admin(pessoa)
+        try:
+            self.repository.apagar_urna(urna_id)
+            self.session.commit()
+        except Exception:
+            self.session.rollback()
+            raise

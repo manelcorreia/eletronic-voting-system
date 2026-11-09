@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from models.urna_model import Urna
-from schemas.urna_schema import UrnaCreate
+from schemas.urna_schema import UrnaCreate, UrnaUpdate
 
 
 class UrnaRepository:
@@ -34,3 +34,20 @@ class UrnaRepository:
     def listar_urnas(self) -> list[Urna]:
         comando = select(Urna).order_by(Urna.localidade)
         return list(self.session.scalars(comando).all())
+
+    def update_urna(self, urna_update: UrnaUpdate, urna_id: int) -> Urna:
+        urna = self.obter_urna_por_id(urna_id)
+        if urna is None:
+            raise ValueError("Não existe urna com esse id")
+
+        for chave, valor in urna_update.model_dump().items():
+            setattr(urna, chave, valor)
+
+        return urna
+
+    def apagar_urna(self, urna_id: int):
+        urna = self.obter_urna_por_id(urna_id)
+        if urna is None:
+            raise ValueError("Não existe urna com esse id")
+
+        self.session.delete(urna)
