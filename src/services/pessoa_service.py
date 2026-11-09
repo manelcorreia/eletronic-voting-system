@@ -1,6 +1,6 @@
 from repositories.pessoa_repository import PessoaRepository
 from schemas import UrnaResponse
-from schemas.pessoa_schema import PessoaCreate, PessoaResponse
+from schemas.pessoa_schema import PessoaCreate, PessoaResponse, PessoaUpdate
 from services.permissoes import verificar_se_faz_parte_da_urna, exigir_cargo_admin, exigir_cargo_responsavel
 
 
@@ -9,7 +9,8 @@ class PessoaService:
         self.session = session
         self.repository = repository
 
-    def criar_pessoa(self, pessoa: PessoaCreate) -> PessoaResponse:
+    def criar_pessoa(self, pessoa_logada: PessoaResponse, pessoa: PessoaCreate) -> PessoaResponse:
+        exigir_cargo_admin(pessoa_logada)
         try:
             pessoa = self.repository.registar_pessoa(pessoa)
             self.session.commit()
@@ -47,3 +48,23 @@ class PessoaService:
             exigir_cargo_responsavel(schema)
             return True
         return False
+
+    def editar_pessoa(self, pessoa_logada: PessoaResponse, update: PessoaUpdate, pessoa_cc: str) -> PessoaResponse:
+        exigir_cargo_admin(pessoa_logada)
+        try:
+            pessoa = self.repository.editar_pessoa(update, pessoa_cc)
+            self.session.commit()
+            self.session.refresh(pessoa)
+            return PessoaResponse.model_validate(pessoa)
+        except Exception:
+            self.session.rollback()
+            raise
+
+    def apagar_pessoa(self, pessoa_logada: PessoaResponse, pessoa_cc: str):
+        exigir_cargo_admin(pessoa_logada)
+        try:
+            self.repository.apagar_pessoa(pessoa_cc)
+            self.session.commit()
+        except Exception:
+            self.session.rollback()
+            raise
