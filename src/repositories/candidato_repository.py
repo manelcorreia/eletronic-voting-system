@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from models.candidato_model import Candidato
-from schemas.candidato_schema import CandidatoCreate
+from schemas.candidato_schema import CandidatoCreate, CandidatoUpdate
 
 
 class CandidatoRepository:
@@ -32,3 +32,20 @@ class CandidatoRepository:
     def listar_candidatos(self) -> list[Candidato]:
         comando = select(Candidato).order_by(Candidato.nome)
         return list(self.session.scalars(comando).all())
+
+    def dar_update(self, candidato_update: CandidatoUpdate, candidato_id: int) -> Candidato:
+        candidato = self.obter_por_id(candidato_id)
+        if candidato is None:
+            raise ValueError("Não existe candidato com esse id")
+
+        for chave, valor in candidato_update.model_dump().items():
+            setattr(candidato, chave, valor)
+
+        return candidato
+
+    def apagar_candidato(self, candidato_id: int):
+        candidato = self.obter_por_id(candidato_id)
+        if candidato is None:
+            raise ValueError("Não existe candidato com esse id")
+
+        self.session.delete(candidato)
