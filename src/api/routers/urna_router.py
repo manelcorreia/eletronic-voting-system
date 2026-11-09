@@ -36,8 +36,8 @@ def ver_numero_nao_votantes(urna_id: int, service: UrnaServiceDep) -> int:
 def ver_numero_votantes(urna_id: int, service: UrnaServiceDep) -> int:
     return service.ver_quantos_votaram(urna_id)
 
-@router.patch("/updates/{urna_id}", status_code=HTTP_200_OK)
-def editar_urna(pessoa: PessoaResponse, update: UrnaUpdate, urna_id: int, service: UrnaServiceDep):
+@router.patch("/updates/{urna_id}", response_model=UrnaResponse, status_code=HTTP_200_OK)
+def editar_urna(pessoa: PessoaResponse, update: UrnaUpdate, urna_id: int, service: UrnaServiceDep) -> UrnaResponse:
     return service.editar_urna(pessoa, update, urna_id)
 
 @router.delete("/apagar/{urna_id}", status_code=HTTP_200_OK)

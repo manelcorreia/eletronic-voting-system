@@ -99,12 +99,14 @@ class UrnaService:
 
         return total
 
-    def editar_urna(self, pessoa: PessoaResponse, update: UrnaUpdate, urna_id: int):
+    def editar_urna(self, pessoa: PessoaResponse, update: UrnaUpdate, urna_id: int) -> UrnaResponse:
         exigir_cargo_admin(pessoa)
         try:
-            self.repository.update_urna(update, urna_id)
+            urna = self.repository.update_urna(update, urna_id)
             self.session.commit()
-            self.session.refresh(update)
+            self.session.refresh(urna)
+            schema = UrnaResponse.model_validate(urna)
+            return schema
         except Exception:
             self.session.rollback()
             raise
