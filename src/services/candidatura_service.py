@@ -1,7 +1,7 @@
 from repositories.candidatura_repository import CandidaturaRepository
 from schemas.candidatura_schema import CandidaturaCreate, CandidaturaResponse
 from schemas.pessoa_schema import PessoaResponse
-from services.permissoes import exigir_cargo_admin, exigir_cargo_responsavel, exigir_cargo_admin_ou_responsavel
+from services.permissoes import exigir_cargo_admin, exigir_cargo_admin_ou_responsavel
 
 
 class CandidaturaService:
@@ -55,3 +55,22 @@ class CandidaturaService:
         except Exception:
             self.session.rollback()
             raise
+
+    def votos_por_partido_geral(self, pessoa: PessoaResponse) -> dict[str, int]:
+        exigir_cargo_admin(pessoa)
+        return self.repository.votos_por_partido()
+
+    def percentagem_votos_partido_geral(self, pessoa: PessoaResponse) -> dict[str, float]:
+        exigir_cargo_admin(pessoa)
+        dicionario_final: dict[str, float] = {}
+        dicionario = self.repository.votos_por_partido()
+        total_votos = sum(dicionario.values())
+
+        if total_votos == 0:
+            for chave in dicionario.keys():
+                dicionario_final[chave] = 0.0
+
+        for chave, valor in dicionario.items():
+            dicionario_final[chave] = round((valor / total_votos) * 100, 2)
+
+        return dicionario_final

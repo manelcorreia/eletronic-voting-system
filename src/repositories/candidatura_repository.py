@@ -1,6 +1,7 @@
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 
+from models.candidato_model import Candidato
 from models.candidatura_model import Candidatura
 from repositories.pessoa_repository import PessoaRepository
 from schemas.candidatura_schema import CandidaturaCreate
@@ -56,3 +57,13 @@ class CandidaturaRepository:
             raise ValueError("Não existe candidatura com esse id")
 
         self.session.delete(candidatura)
+
+    def votos_por_partido(self) -> dict[str, int]:
+        comando = select(
+            Candidato.partido,
+            func.coalesce(func.sum(Candidatura.votos), 0),
+        ).join(Candidatura, Candidatura.candidato_id == Candidato.id).group_by(Candidato.partido)
+
+        resultados = self.session.execute(comando).all()
+
+        return dict(resultados)
