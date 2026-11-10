@@ -1,6 +1,8 @@
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 
+from models.candidato_model import Candidato
+from models.candidatura_model import Candidatura
 from models.urna_model import Urna
 from schemas.urna_schema import UrnaCreate, UrnaUpdate
 
@@ -53,12 +55,24 @@ class UrnaRepository:
         self.session.delete(urna)
 
     def votos_por_partido(self, urna_id: int) -> dict:
-        dicionario = {}
+        dicionario: dict[str,int] = {}
         urna = self.obter_urna_por_id(urna_id)
         if urna is None:
             raise ValueError("Não existe urna com esse id")
 
         for candidatura in urna.candidaturas:
-            dicionario[candidatura.candidato.partido] = candidatura.votos
+            partido = candidatura.candidato.partido
+            dicionario[partido] += dicionario.get(partido, 0) + candidatura.votos
 
         return dicionario
+
+    def votos_partido_especifico_na_urna(self, partido: str, urna_id: int) -> int:
+        comando = select(
+            func.sum(Candidatura.votos),
+        ).join(Candidato, Candidatura.candidato_id == Candidato.id).where(
+            Candidatura.urna_id == urna_id,
+            Candidato.partido == partido,
+        )
+
+        resultado = self.session.execute(comando).scalar()
+        return resultado or 0

@@ -44,6 +44,10 @@ def editar_urna(pessoa: PessoaResponse, update: UrnaUpdate, urna_id: int, servic
 def apagar_urna(pessoa: PessoaResponse, urna_id: int, service: UrnaServiceDep):
     return service.apagar_urna(pessoa, urna_id)
 
-@router.get("/votos/partido/urna_{urna_id}", response_model=dict, status_code=HTTP_200_OK)
+@router.get("/votos/partidos/urna_{urna_id}", response_model=dict, status_code=HTTP_200_OK)
 def ver_votos_partido(pessoa: PessoaResponse, urna_id: int, service: UrnaServiceDep) -> dict:
     return service.votos_por_partido(pessoa, urna_id)
+
+@router.get("/votos/partido_{partido}/urna_{urna_id}", response_model=int, status_code=HTTP_200_OK)
+def ver_votos_na_urna_partido_especifico(pessoa: PessoaResponse, partido: str, urna_id: int, service: UrnaServiceDep) -> int:
+    return service.votos_partido_na_urna(pessoa, partido, urna_id)
