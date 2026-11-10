@@ -38,7 +38,7 @@ class CandidatoRepository:
         if candidato is None:
             raise ValueError("Não existe candidato com esse id")
 
-        for chave, valor in candidato_update.model_dump().items():
+        for chave, valor in candidato_update.model_dump(exclude_unset=True).items():
             setattr(candidato, chave, valor)
 
         return candidato
