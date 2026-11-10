@@ -1,7 +1,7 @@
 from repositories.candidatura_repository import CandidaturaRepository
 from schemas.candidatura_schema import CandidaturaCreate, CandidaturaResponse
 from schemas.pessoa_schema import PessoaResponse
-from services.permissoes import exigir_cargo_admin, exigir_cargo_responsavel
+from services.permissoes import exigir_cargo_admin, exigir_cargo_responsavel, exigir_cargo_admin_ou_responsavel
 
 
 class CandidaturaService:
@@ -34,7 +34,7 @@ class CandidaturaService:
         return self.repository.contar_votos_na_urna(urna_id)
 
     def ver_todas_candidaturas(self, pessoa: PessoaResponse) -> list[CandidaturaResponse]:
-        exigir_cargo_admin(pessoa) or exigir_cargo_responsavel(pessoa)
+        exigir_cargo_admin_ou_responsavel(pessoa)
         candidaturas = self.repository.obter_candidaturas()
         schemas = []
         for candidatura in candidaturas:
@@ -42,7 +42,7 @@ class CandidaturaService:
         return schemas
 
     def obter_candidatura_por_urna_candidato(self, pessoa: PessoaResponse, urna_id: int, candidato_id: int) -> CandidaturaResponse:
-        exigir_cargo_admin(pessoa) or exigir_cargo_responsavel(pessoa)
+        exigir_cargo_admin_ou_responsavel(pessoa)
         candidatura = self.repository.obter_candidatura_urna_candidato(urna_id, candidato_id)
         schema = CandidaturaResponse.model_validate(candidatura)
         return schema

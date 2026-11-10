@@ -16,3 +16,7 @@ def exigir_cargo_admin(pessoa: PessoaResponse) -> None:
 def verificar_se_faz_parte_da_urna(pessoa: PessoaResponse, urna: UrnaResponse) -> None:
     if pessoa.urna_id != urna.id:
         raise PermissaoError("Não tem permissão para realizar esta ação nesta urna")
+
+def exigir_cargo_admin_ou_responsavel(pessoa: PessoaResponse) -> None:
+    if pessoa.cargo not in ("admin", "responsavel"):
+        raise PermissaoError("Não tem permissão para realizar esta ação")

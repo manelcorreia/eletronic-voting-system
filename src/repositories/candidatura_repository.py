@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 
 from models.candidatura_model import Candidatura
@@ -47,11 +47,8 @@ class CandidaturaRepository:
         return list(self.session.scalars(comando).all())
 
     def contar_votos_na_urna(self, urna_id: int) -> int:
-        total = 0
-        for candidatura in self.obter_candidaturas():
-            if candidatura.urna_id == urna_id:
-                total += candidatura.votos
-        return total
+        comando = select(func.sum(Candidatura.votos)).where(Candidatura.urna_id == urna_id)
+        return self.session.execute(comando).scalar() or 0
 
     def apagar_candidatura(self, candidatura_id: int):
         candidatura = self.obter_candidatura_por_id(candidatura_id)

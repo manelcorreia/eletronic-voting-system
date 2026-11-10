@@ -42,11 +42,8 @@ class CandidatoService:
             if not urna.fechada:
                 raise ValueError("A urna não está fechada.")
 
-        try:
-            votos = self.repository.total_votos_candidato(candidato_nome)
-            return votos
-        except Exception:
-            raise
+        votos = self.repository.total_votos_candidato(candidato_nome)
+        return votos
 
     def listar_candidatos(self) -> list[CandidatoResponse]:
         lista_candidatos = []

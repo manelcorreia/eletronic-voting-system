@@ -71,6 +71,11 @@ class UrnaService:
         total = 0
         total_nao_votantes = 0
         urna = self.repository.obter_urna_por_id(urna_id)
+        if not urna:
+            raise ValueError("Não existe urna com esse ID")
+
+        if len(urna.pessoas) == 0:
+            return 0.0
 
         for p in urna.pessoas:
             total += 1
@@ -123,3 +128,7 @@ class UrnaService:
     def votos_por_partido(self, pessoa: PessoaResponse, urna_id: int) -> dict:
         exigir_cargo_admin(pessoa)
         return self.repository.votos_por_partido(urna_id)
+
+    def votos_partido_na_urna(self, pessoa: PessoaResponse, partido: str, urna_id: int) -> int:
+        exigir_cargo_admin(pessoa)
+        return self.repository.votos_partido_especifico_na_urna(partido, urna_id)
