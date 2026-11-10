@@ -43,3 +43,7 @@ def editar_urna(pessoa: PessoaResponse, update: UrnaUpdate, urna_id: int, servic
 @router.delete("/apagar/urna", status_code=HTTP_204_NO_CONTENT)
 def apagar_urna(pessoa: PessoaResponse, urna_id: int, service: UrnaServiceDep):
     return service.apagar_urna(pessoa, urna_id)
+
+@router.get("/votos/partido/urna_{urna_id}", response_model=dict, status_code=HTTP_200_OK)
+def ver_votos_partido(pessoa: PessoaResponse, urna_id: int, service: UrnaServiceDep) -> dict:
+    return service.votos_por_partido(pessoa, urna_id)

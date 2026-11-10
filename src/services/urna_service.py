@@ -119,3 +119,7 @@ class UrnaService:
         except Exception:
             self.session.rollback()
             raise
+
+    def votos_por_partido(self, pessoa: PessoaResponse, urna_id: int) -> dict:
+        exigir_cargo_admin(pessoa)
+        return self.repository.votos_por_partido(urna_id)

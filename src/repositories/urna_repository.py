@@ -51,3 +51,14 @@ class UrnaRepository:
             raise ValueError("Não existe urna com esse id")
 
         self.session.delete(urna)
+
+    def votos_por_partido(self, urna_id: int) -> dict:
+        dicionario = {}
+        urna = self.obter_urna_por_id(urna_id)
+        if urna is None:
+            raise ValueError("Não existe urna com esse id")
+
+        for candidatura in urna.candidaturas:
+            dicionario[candidatura.candidato.partido] = candidatura.votos
+
+        return dicionario
