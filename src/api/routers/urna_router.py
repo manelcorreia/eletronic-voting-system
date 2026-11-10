@@ -51,3 +51,7 @@ def ver_votos_partido(pessoa: PessoaResponse, urna_id: int, service: UrnaService
 @router.get("/votos/partido_{partido}/urna_{urna_id}", response_model=int, status_code=HTTP_200_OK)
 def ver_votos_na_urna_partido_especifico(pessoa: PessoaResponse, partido: str, urna_id: int, service: UrnaServiceDep) -> int:
     return service.votos_partido_na_urna(pessoa, partido, urna_id)
+
+@router.get("/percentagem_votos_partidos/urna_{urna_id}", response_model=dict, status_code=HTTP_200_OK)
+def ver_percentagem_votos_partidos_na_urna(pessoa: PessoaResponse, urna_id: int, service: UrnaServiceDep) -> dict:
+    return service.percentagem_partido_urna(pessoa, urna_id)

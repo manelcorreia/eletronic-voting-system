@@ -132,3 +132,19 @@ class UrnaService:
     def votos_partido_na_urna(self, pessoa: PessoaResponse, partido: str, urna_id: int) -> int:
         exigir_cargo_admin(pessoa)
         return self.repository.votos_partido_especifico_na_urna(partido, urna_id)
+
+    def percentagem_partido_urna(self, pessoa: PessoaResponse, urna_id: int) -> dict:
+        exigir_cargo_admin(pessoa)
+        dicionario_final: dict[str,float] = {}
+        dicionario = self.repository.votos_por_partido(urna_id)
+        total_votos = sum(dicionario.values())
+
+        if total_votos == 0:
+            for chave in dicionario.keys():
+                dicionario_final[chave] = 0.0
+            return dicionario_final
+
+        for chave, valor in dicionario.items():
+            dicionario_final[chave] = round((valor / total_votos) * 100, 2)
+
+        return dicionario_final
