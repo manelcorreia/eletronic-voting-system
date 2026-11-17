@@ -2,8 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from models.pessoa_model import Pessoa
-from schemas.pessoa_schema import PessoaCreate, PessoaResponse, PessoaUpdate
-from services.permissoes import exigir_cargo_admin
+from schemas.pessoa_schema import PessoaCreate, PessoaUpdate
 
 
 class PessoaRepository:

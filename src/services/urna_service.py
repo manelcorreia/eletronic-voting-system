@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 
+from api.exceptions import UrnaNaoEncontrada
 from repositories.candidato_repository import CandidatoRepository
 from repositories.candidatura_repository import CandidaturaRepository
 from repositories.pessoa_repository import PessoaRepository
@@ -42,7 +43,7 @@ class UrnaService:
 
         urna = self.repository.obter_urna_por_id(urna_id)
         if urna is None:
-            raise ValueError("Não existe urna com esse ID")
+            raise UrnaNaoEncontrada("Não existe urna com esse ID")
 
         try:
             self.repository.fechar_urna(urna_id)
@@ -72,7 +73,7 @@ class UrnaService:
         total_nao_votantes = 0
         urna = self.repository.obter_urna_por_id(urna_id)
         if not urna:
-            raise ValueError("Não existe urna com esse ID")
+            raise UrnaNaoEncontrada("Não existe urna com esse ID")
 
         if len(urna.pessoas) == 0:
             return 0.0

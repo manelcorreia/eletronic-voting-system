@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 
+from api.exceptions import UrnaFechada
 from repositories.candidato_repository import CandidatoRepository
 from repositories.candidatura_repository import CandidaturaRepository
 from repositories.urna_repository import UrnaRepository
@@ -40,7 +41,7 @@ class CandidatoService:
 
         for urna in urnas:
             if not urna.fechada:
-                raise ValueError("A urna não está fechada.")
+                raise UrnaFechada("A urna não está fechada.")
 
         votos = self.repository.total_votos_candidato(candidato_nome)
         return votos
