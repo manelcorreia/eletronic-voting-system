@@ -1,9 +1,6 @@
+from api.exceptions import PermissaoError
 from schemas import UrnaResponse
 from schemas.pessoa_schema import PessoaResponse
-
-
-class PermissaoError(Exception):
-    pass
 
 def exigir_cargo_responsavel(pessoa: PessoaResponse) -> None:
     if pessoa.cargo != "responsavel":
