@@ -149,3 +149,15 @@ class UrnaService:
             dicionario_final[chave] = round((valor / total_votos) * 100, 2)
 
         return dicionario_final
+
+    def votos_partidos_numa_regiao(self, pessoa: PessoaResponse, regiao: str) -> list:
+        exigir_cargo_admin(pessoa)
+        return self.repository.votos_partidos_por_regiao(regiao)
+
+    def votos_partido_especifico_numa_regiao(self, pessoa: PessoaResponse, regiao: str, partido: str):
+        exigir_cargo_admin(pessoa)
+        return self.repository.votos_partido_especifico_por_regiao(regiao, partido)
+
+    def votos_partidos_regioes(self, pessoa: PessoaResponse) -> list:
+        exigir_cargo_admin(pessoa)
+        return self.repository.votos_partidos_nas_regioes()

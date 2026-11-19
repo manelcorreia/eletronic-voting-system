@@ -55,3 +55,15 @@ def ver_votos_na_urna_partido_especifico(pessoa: PessoaResponse, partido: str, u
 @router.get("/percentagem_votos_partidos/urna_{urna_id}", response_model=dict, status_code=HTTP_200_OK)
 def ver_percentagem_votos_partidos_na_urna(pessoa: PessoaResponse, urna_id: int, service: UrnaServiceDep) -> dict:
     return service.percentagem_partido_urna(pessoa, urna_id)
+
+@router.get("/votos/partidos/regiao_{regiao}", response_model=list, status_code=HTTP_200_OK)
+def ver_numero_votos_partidos_numa_regiao(pessoa: PessoaResponse, regiao: str, service: UrnaServiceDep) -> list:
+    return service.votos_partidos_numa_regiao(pessoa, regiao)
+
+@router.get("/votos/partido_{partido}/regiao_{regiao}", status_code=HTTP_200_OK)
+def ver_numero_votos_partido_especifico_numa_regiao(pessoa: PessoaResponse, partido: str, regiao: str, service: UrnaServiceDep):
+    return service.votos_partido_especifico_numa_regiao(pessoa, regiao, partido)
+
+@router.get("/votos/partidos/panorama_geral_regioes", response_model=list, status_code=HTTP_200_OK)
+def ver_panorama_geral_votos_partidos(pessoa: PessoaResponse, service: UrnaServiceDep) -> list:
+    return service.votos_partidos_regioes(pessoa)
