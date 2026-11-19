@@ -12,6 +12,7 @@ class Urna(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     localidade: Mapped[str] = mapped_column(String(120), unique=True)
     fechada: Mapped[bool] = mapped_column(default=False)
+    regiao: Mapped[str] = mapped_column(String(100), nullable=True)
 
     pessoas: Mapped[list["Pessoa"]] = relationship(back_populates="urna", cascade="all, delete-orphan", lazy="selectin")
     candidaturas: Mapped[list["Candidatura"]] = relationship(back_populates="urna", cascade="all, delete-orphan", lazy="selectin")

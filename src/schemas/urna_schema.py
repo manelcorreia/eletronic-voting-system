@@ -7,6 +7,7 @@ if TYPE_CHECKING:
 class UrnaBaseModel(BaseModel):
     localidade: str = Field(min_length=3, max_length=120)
     fechada: bool = Field(default=False)
+    regiao: str = Field(min_length=3, max_length=100)
 
     @field_validator('localidade')
     @classmethod
@@ -15,12 +16,20 @@ class UrnaBaseModel(BaseModel):
             raise ValueError("Localidade não pode ter números")
         return valor
 
+    @field_validator('regiao')
+    @classmethod
+    def validar_regiao(cls, valor):
+        if any(l.isdigit() for l in valor):
+            raise ValueError("Região não pode ter números")
+        return valor
+
 class UrnaCreate(UrnaBaseModel):
     pass
 
 class UrnaUpdate(UrnaBaseModel):
     localidade: str | None = Field(default=None, min_length=3, max_length=120)
     fechada: bool | None = None
+    regiao: str | None = Field(default=None, min_length=3, max_length=100)
 
     @field_validator('localidade')
     @classmethod
@@ -29,6 +38,15 @@ class UrnaUpdate(UrnaBaseModel):
             return None
         if any(l.isdigit() for l in valor):
             raise ValueError("Localidade não pode ter números")
+        return valor
+
+    @field_validator('regiao')
+    @classmethod
+    def validar_regiao(cls, valor):
+        if valor is None:
+            return None
+        if any(l.isdigit() for l in valor):
+            raise ValueError("Região não pode ter números")
         return valor
 
 class UrnaResponse(UrnaBaseModel):
