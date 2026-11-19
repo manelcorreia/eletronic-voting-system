@@ -76,3 +76,46 @@ class UrnaRepository:
 
         resultado = self.session.execute(comando).scalar()
         return resultado or 0
+
+    def votos_partidos_por_regiao(self, regiao: str) -> list:
+        comando = (
+            select(
+                Urna.regiao,
+                Candidato.partido,
+                func.sum(Candidatura.votos).label("total_votos"),
+            )
+            .join(Candidato, Candidatura.candidato_id == Candidato.id)
+            .join(Urna, Candidatura.urna_id == Urna.id)
+            .where(Urna.regiao == regiao)
+            .group_by(Urna.regiao, Candidato.partido)
+            .order_by(func.sum(Candidatura.votos).desc())
+        )
+        return list(self.session.execute(comando).all())
+
+    def votos_partido_especifico_por_regiao(self, regiao: str, partido: str):
+        comando = (
+            select(
+                Urna.regiao,
+                Candidato.partido,
+                func.sum(Candidatura.votos).label("total_votos"),
+            )
+            .join(Candidato, Candidatura.candidato_id == Candidato.id)
+            .join(Urna, Candidatura.urna_id == Urna.id)
+            .where(Urna.regiao == regiao, Candidato.partido == partido)
+            .group_by(Urna.regiao, Candidato.partido)
+        )
+        return self.session.execute(comando).one_or_none()
+
+    def votos_partidos_nas_regioes(self) -> list:
+        comando = (
+            select(
+                Urna.regiao,
+                Candidato.partido,
+                func.sum(Candidatura.votos).label("total_votos"),
+            )
+            .join(Candidato, Candidatura.candidato_id == Candidato.id)
+            .join(Urna, Candidatura.urna_id == Urna.id)
+            .group_by(Urna.regiao, Candidato.partido)
+            .order_by(Urna.regiao.asc(), func.sum(Candidatura.votos).desc())
+        )
+        return list(self.session.execute(comando).all())
