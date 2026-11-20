@@ -26,7 +26,6 @@ class PessoaBaseModel(BaseModel):
 
 class PessoaCreate(PessoaBaseModel):
     password: str = Field(min_length=8)
-    cargo: Literal["responsavel", "admin"] | None = None
 
     @field_validator('password')
     @classmethod
@@ -45,12 +44,14 @@ class PessoaCreate(PessoaBaseModel):
 
         return valor
 
+class PessoaCreateComCargo(PessoaCreate):     # para seed e ações de admin
+    cargo: Literal["admin", "responsavel"] | None = None
+
 class PessoaUpdate(PessoaBaseModel):
     nome: str | None = Field(default=None, min_length=3, max_length=120)
     cc: str | None = Field(default=None, min_length=8)
     urna_id: int | None = None
     votou: bool | None = None
-    cargo: Literal["responsavel", "admin"] | None = None
     password: str | None = Field(default=None, min_length=8)
 
     @field_validator('nome')
@@ -91,6 +92,9 @@ class PessoaUpdate(PessoaBaseModel):
             raise ValueError("Password tem de ter pelo menos 1 caractere especial")
 
         return valor
+
+class PessoaUpdateComCargo(PessoaUpdate):
+    cargo: Literal["responsavel", "admin"] | None = None
 
 class PessoaResponse(PessoaBaseModel):
     model_config = ConfigDict(from_attributes=True)
