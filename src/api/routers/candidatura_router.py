@@ -28,8 +28,8 @@ def ver_candidatura_urna_candidato(pessoa: PessoaResponse, urna_id: int, candida
     return service.obter_candidatura_por_urna_candidato(pessoa, urna_id, candidato_id)
 
 @router.delete("/apagar/candidatura", status_code=HTTP_204_NO_CONTENT)
-def apagar_candidatura(pessoa: PessoaResponse, candidatura_id: int, service: CandidaturaServiceDep):
-    return service.apagar_candidatura(pessoa, candidatura_id)
+def apagar_candidatura(pessoa: PessoaResponse, urna_id: int, candidatura_id: int, service: CandidaturaServiceDep):
+    return service.apagar_candidatura(pessoa, urna_id, candidatura_id)
 
 @router.get("/votos/partidos/geral", response_model=dict, status_code=HTTP_200_OK)
 def ver_numero_votos_partidos_geral(pessoa: PessoaResponse, service: CandidaturaServiceDep) -> dict:
