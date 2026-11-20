@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from api.exceptions import UrnaNaoEncontrada
+from api.exceptions import UrnaNaoEncontrada, OperacaoNaoPermitida, UrnaJaExiste
 from repositories.candidato_repository import CandidatoRepository
 from repositories.candidatura_repository import CandidaturaRepository
 from repositories.pessoa_repository import PessoaRepository
@@ -8,7 +8,7 @@ from repositories.urna_repository import UrnaRepository
 from schemas.candidatura_schema import CandidaturaCreate
 from schemas.pessoa_schema import PessoaResponse
 from schemas.urna_schema import UrnaCreate, UrnaResponse, UrnaUpdate
-from services.permissoes import exigir_cargo_responsavel, exigir_cargo_admin
+from services.permissoes import exigir_cargo_responsavel, exigir_cargo_admin, exigir_responsavel_admin_e_da_urna
 
 
 class UrnaService:
@@ -22,6 +22,8 @@ class UrnaService:
     def criar_urna(self, pessoa: PessoaResponse, urna: UrnaCreate) -> UrnaResponse:
         exigir_cargo_admin(pessoa)
         try:
+            if self.repository.obter_urna_por_localidade(urna.localidade):
+                raise UrnaJaExiste("Já existe urna nessa localidade")
             model = self.repository.adicionar_urna(urna)
             self.session.flush()
 
@@ -39,7 +41,7 @@ class UrnaService:
             raise
 
     def fechar_urna(self, pessoa: PessoaResponse, urna_id: int):
-        exigir_cargo_responsavel(pessoa)
+        exigir_responsavel_admin_e_da_urna(pessoa, urna_id)
 
         urna = self.repository.obter_urna_por_id(urna_id)
         if urna is None:
@@ -108,6 +110,8 @@ class UrnaService:
     def editar_urna(self, pessoa: PessoaResponse, update: UrnaUpdate, urna_id: int) -> UrnaResponse:
         exigir_cargo_admin(pessoa)
         try:
+            if not self.repository.obter_urna_por_id(urna_id):
+                raise UrnaNaoEncontrada("Não existe urna com esse ID")
             urna = self.repository.update_urna(update, urna_id)
             self.session.commit()
             self.session.refresh(urna)
@@ -119,6 +123,13 @@ class UrnaService:
 
     def apagar_urna(self, pessoa: PessoaResponse, urna_id: int):
         exigir_cargo_admin(pessoa)
+        urna = self.repository.obter_urna_por_id(urna_id)
+        if urna is None:
+            raise UrnaNaoEncontrada("Não existe urna com esse id")
+
+        if urna.pessoas or self.candidatura_repository.contar_votos_na_urna(urna_id) > 0:
+            raise OperacaoNaoPermitida("Não se pode apagar uma urna com pessoas ou votos")
+
         try:
             self.repository.apagar_urna(urna_id)
             self.session.commit()
@@ -128,14 +139,23 @@ class UrnaService:
 
     def votos_por_partido(self, pessoa: PessoaResponse, urna_id: int) -> dict:
         exigir_cargo_admin(pessoa)
+        if not self.repository.obter_urna_por_id(urna_id):
+            raise UrnaNaoEncontrada("Não existe urna com esse id")
+
         return self.repository.votos_por_partido(urna_id)
 
     def votos_partido_na_urna(self, pessoa: PessoaResponse, partido: str, urna_id: int) -> int:
         exigir_cargo_admin(pessoa)
+        if not self.repository.obter_urna_por_id(urna_id):
+            raise UrnaNaoEncontrada("Não existe urna com esse id")
+
         return self.repository.votos_partido_especifico_na_urna(partido, urna_id)
 
     def percentagem_partido_urna(self, pessoa: PessoaResponse, urna_id: int) -> dict:
         exigir_cargo_admin(pessoa)
+        if not self.repository.obter_urna_por_id(urna_id):
+            raise UrnaNaoEncontrada("Não existe urna com esse id")
+
         dicionario_final: dict[str,float] = {}
         dicionario = self.repository.votos_por_partido(urna_id)
         total_votos = sum(dicionario.values())
@@ -161,3 +181,16 @@ class UrnaService:
     def votos_partidos_regioes(self, pessoa: PessoaResponse) -> list:
         exigir_cargo_admin(pessoa)
         return self.repository.votos_partidos_nas_regioes()
+
+    def percentagem_votos_partido_por_regiao_especifica(self, pessoa: PessoaResponse, regiao: str) -> dict:
+        linhas = self.votos_partidos_numa_regiao(pessoa, regiao)
+
+        totais: dict[str,int] = {}
+        for partido, votos in linhas:
+            totais[partido] = totais.get(partido, 0) + votos
+
+        total_regiao = sum(totais.values())
+        if total_regiao == 0:
+            return {partido: 0.0 for partido in totais.keys()}
+
+        return {partido: round((votos / total_regiao) * 100, 2) for partido, votos in totais.items()}

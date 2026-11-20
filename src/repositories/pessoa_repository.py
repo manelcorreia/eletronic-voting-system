@@ -10,8 +10,6 @@ class PessoaRepository:
         self.session = session
 
     def registar_pessoa(self, pessoa: PessoaCreate) -> Pessoa:
-        if self.obter_por_cc(pessoa.cc) is not None:
-            raise ValueError("Pessoa já está registada")
         model = Pessoa(**pessoa.model_dump())
         self.session.add(model)
         return model
@@ -31,18 +29,12 @@ class PessoaRepository:
 
     def editar_pessoa(self, update: PessoaUpdate, pessoa_cc: str) -> Pessoa:
         pessoa = self.obter_por_cc(pessoa_cc)
-        if not pessoa:
-            raise ValueError("Não existe pessoa com esse cc")
 
-        for chave, valor in update.model_dump().items():
+        for chave, valor in update.model_dump(exclude_unset=True).items():
             setattr(pessoa, chave, valor)
 
         return pessoa
 
     def apagar_pessoa(self, pessoa_cc: str):
         pessoa = self.obter_por_cc(pessoa_cc)
-
-        if not pessoa:
-            raise ValueError("Não existe pessoa com esse cc")
-
         self.session.delete(pessoa)

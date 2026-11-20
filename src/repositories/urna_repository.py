@@ -12,8 +12,6 @@ class UrnaRepository:
         self.session = session
 
     def adicionar_urna(self, urna: UrnaCreate) -> Urna:
-        if self.obter_urna_por_localidade(urna.localidade) is not None:
-            raise ValueError("Já existe urna nessa localidade")
         model = Urna(**urna.model_dump())
         self.session.add(model)
         return model
@@ -27,10 +25,6 @@ class UrnaRepository:
 
     def fechar_urna(self, urna_id: int):
         urna = self.obter_urna_por_id(urna_id)
-
-        if urna is None:
-            raise ValueError("Não existe urna com esse id")
-
         urna.fechada = True
 
     def listar_urnas(self) -> list[Urna]:
@@ -39,30 +33,23 @@ class UrnaRepository:
 
     def update_urna(self, urna_update: UrnaUpdate, urna_id: int) -> Urna:
         urna = self.obter_urna_por_id(urna_id)
-        if urna is None:
-            raise ValueError("Não existe urna com esse id")
 
-        for chave, valor in urna_update.model_dump().items():
+        for chave, valor in urna_update.model_dump(exclude_unset=True).items():
             setattr(urna, chave, valor)
 
         return urna
 
     def apagar_urna(self, urna_id: int):
         urna = self.obter_urna_por_id(urna_id)
-        if urna is None:
-            raise ValueError("Não existe urna com esse id")
-
         self.session.delete(urna)
 
     def votos_por_partido(self, urna_id: int) -> dict:
         dicionario: dict[str,int] = {}
         urna = self.obter_urna_por_id(urna_id)
-        if urna is None:
-            raise ValueError("Não existe urna com esse id")
 
         for candidatura in urna.candidaturas:
             partido = candidatura.candidato.partido
-            dicionario[partido] += dicionario.get(partido, 0) + candidatura.votos
+            dicionario[partido] = dicionario.get(partido, 0) + candidatura.votos
 
         return dicionario
 
@@ -80,14 +67,14 @@ class UrnaRepository:
     def votos_partidos_por_regiao(self, regiao: str) -> list:
         comando = (
             select(
-                Urna.regiao,
                 Candidato.partido,
                 func.sum(Candidatura.votos).label("total_votos"),
             )
+            .select_from(Candidatura)
             .join(Candidato, Candidatura.candidato_id == Candidato.id)
             .join(Urna, Candidatura.urna_id == Urna.id)
             .where(Urna.regiao == regiao)
-            .group_by(Urna.regiao, Candidato.partido)
+            .group_by(Candidato.partido)
             .order_by(func.sum(Candidatura.votos).desc())
         )
         return list(self.session.execute(comando).all())
@@ -99,6 +86,7 @@ class UrnaRepository:
                 Candidato.partido,
                 func.sum(Candidatura.votos).label("total_votos"),
             )
+            .select_from(Candidatura)
             .join(Candidato, Candidatura.candidato_id == Candidato.id)
             .join(Urna, Candidatura.urna_id == Urna.id)
             .where(Urna.regiao == regiao, Candidato.partido == partido)
@@ -113,6 +101,7 @@ class UrnaRepository:
                 Candidato.partido,
                 func.sum(Candidatura.votos).label("total_votos"),
             )
+            .select_from(Candidatura)
             .join(Candidato, Candidatura.candidato_id == Candidato.id)
             .join(Urna, Candidatura.urna_id == Urna.id)
             .group_by(Urna.regiao, Candidato.partido)

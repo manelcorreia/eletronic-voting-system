@@ -1,3 +1,4 @@
+from api.exceptions import PessoaJaRegistada, PessoaNaoEncontrada
 from repositories.pessoa_repository import PessoaRepository
 from schemas import UrnaResponse
 from schemas.pessoa_schema import PessoaCreate, PessoaResponse, PessoaUpdate
@@ -12,6 +13,8 @@ class PessoaService:
     def criar_pessoa(self, pessoa_logada: PessoaResponse, pessoa: PessoaCreate) -> PessoaResponse:
         exigir_cargo_admin(pessoa_logada)
         try:
+            if self.repository.obter_por_cc(pessoa.cc):
+                raise PessoaJaRegistada("Já existe uma pessoa registada com esse cc")
             pessoa = self.repository.registar_pessoa(pessoa)
             self.session.commit()
             self.session.refresh(pessoa)
@@ -52,6 +55,8 @@ class PessoaService:
     def editar_pessoa(self, pessoa_logada: PessoaResponse, update: PessoaUpdate, pessoa_cc: str) -> PessoaResponse:
         exigir_cargo_admin(pessoa_logada)
         try:
+            if not self.repository.obter_por_cc(pessoa_cc):
+                raise PessoaNaoEncontrada("Não existe nenhuma pessoa com esse cc")
             pessoa = self.repository.editar_pessoa(update, pessoa_cc)
             self.session.commit()
             self.session.refresh(pessoa)
@@ -63,6 +68,8 @@ class PessoaService:
     def apagar_pessoa(self, pessoa_logada: PessoaResponse, pessoa_cc: str):
         exigir_cargo_admin(pessoa_logada)
         try:
+            if not self.repository.obter_por_cc(pessoa_cc):
+                raise PessoaNaoEncontrada("Não existe nenhuma pessoa com esse cc")
             self.repository.apagar_pessoa(pessoa_cc)
             self.session.commit()
         except Exception:
