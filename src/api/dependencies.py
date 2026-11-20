@@ -24,13 +24,16 @@ DbSession = Annotated[Session, Depends(get_db)]
 
 def get_candidato_service(db: DbSession) -> CandidatoService:
     repo = CandidatoRepository(db)
-    return CandidatoService(db, repo)
+    repo_urna = UrnaRepository(db)
+    repo_candidatura = CandidaturaRepository(db)
+    return CandidatoService(db, repo, repo_urna, repo_candidatura)
 
 CandidatoServiceDep = Annotated[CandidatoService, Depends(get_candidato_service)]
 
 def get_candidatura_service(db: DbSession) -> CandidaturaService:
     repo = CandidaturaRepository(db)
-    return CandidaturaService(db, repo)
+    repo_pessoas = PessoaRepository(db)
+    return CandidaturaService(db, repo, repo_pessoas)
 
 CandidaturaServiceDep = Annotated[CandidaturaService, Depends(get_candidatura_service)]
 
@@ -42,6 +45,9 @@ PessoaServiceDep = Annotated[PessoaService, Depends(get_pessoa_service)]
 
 def get_urna_service(db: DbSession) -> UrnaService:
     repo = UrnaRepository(db)
-    return UrnaService(db, repo)
+    repo_candidatura = CandidaturaRepository(db)
+    repo_candidato = CandidatoRepository(db)
+    repo_pessoa = PessoaRepository(db)
+    return UrnaService(db, repo, repo_candidatura, repo_candidato, repo_pessoa)
 
 UrnaServiceDep = Annotated[UrnaService, Depends(get_urna_service)]
