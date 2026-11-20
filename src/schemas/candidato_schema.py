@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 
 class CandidatoBaseModel(BaseModel):
     nome: str = Field(min_length=3, max_length=120)
-    partido: str = Field(min_length=3, max_length=100)
+    partido: str | None = Field(default="Sem partido", min_length=3, max_length=100)
 
     @field_validator("nome")
     @classmethod
